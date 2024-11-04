@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Finder</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        body {
+            background-image: url('{{ url_for('static', filename='images/cooking_recipe_background.webp') }}');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-attachment: fixed;
+        }
+    </style>
+   
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const addIngredientButton = document.getElementById('addIngredientButton');
+            const ingredientContainer = document.getElementById('ingredientContainer');
+            let ingredients = [];
+
+            // Fetch ingredient list from the server
+            fetch('/get_ingredients')
+                .then(response => response.json())
+                .then(data => {
+                    ingredients = data;
+                });
+
+            function createIngredientInput() {
+                const inputWrapper = document.createElement('div');
+                inputWrapper.classList.add('ingredient-input-wrapper');
+
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.name = 'ingredients';
+                input.placeholder = 'Type to search...';
+                input.classList.add('ingredient-input');
+                
+                input.addEventListener('input', function() {
+                    const inputValue = this.value.toLowerCase();
+                    let suggestions = ingredients.filter(ingredient => ingredient.startsWith(inputValue)).slice(0, 10);
+
+                    let datalist = document.getElementById(`${this.name}-datalist`);
+                    if (!datalist) {
+                        datalist = document.createElement('datalist');
+                        datalist.id = `${this.name}-datalist`;
+                        document.body.appendChild(datalist);
+                    }
+                    datalist.innerHTML = ''; // Clear old options
+                    suggestions.forEach(suggestion => {
+                        const option = document.createElement('option');
+                        option.value = suggestion;
+                        datalist.appendChild(option);
+                    });
+
+                    this.setAttribute('list', datalist.id);
+                });
+
+                inputWrapper.appendChild(input);
+                ingredientContainer.appendChild(inputWrapper);
+            }
+
+            // Create the first input field
+            createIngredientInput();
+
+            // Add new input fields on button click
+            addIngredientButton.addEventListener('click', function() {
+                createIngredientInput();
+            });
+        });
+    </script>
+</head>
+<body>
+    <h1>Find Recipes Based on Your Ingredients</h1>
+    <form action="/search" method="post">
+        <div id="ingredientContainer"></div>
+        <button type="button" id="addIngredientButton">Add Another Ingredient</button><br><br>
+        <button type="submit">Find Recipes</button>
+    </form>
+</body>
+</html>

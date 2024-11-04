@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        body {
+            background-image: url('{{ url_for('static', filename='images/cooking_recipe_background.webp') }}');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-attachment: fixed;
+        }
+    </style>
+</head>
+<body>
+    <h1>Top Recipe Results</h1>
+    <p>Based on your selected ingredients, here are the best-matching recipes:</p>
+    <ul>
+        {% for recipe in recipes %}
+            <li>
+                <h3>{{ recipe['name'] }}</h3>
+                <p><strong>Ingredients:</strong> {{ recipe['ingredients'] }}</p>
+                <p><strong>Relevance Score:</strong> {{ recipe['bm25_score'] | round(2) }}</p>
+            </li>
+        {% else %}
+            <p>No recipes found for the selected ingredients.</p>
+        {% endfor %}
+    </ul>
+    <a href="/">Back to ingredient selection</a>
+</body>
+</html>
